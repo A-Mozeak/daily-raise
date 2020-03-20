@@ -5,12 +5,108 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Raise Your Hand!</title>
+  <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
+
+  <!-- Script "create-demo-room" sets us up with a room to join
+      so that we don't have to log in or make a Daily account to test
+      things out. -->
+  <script src="create-demo-room.js"></script>
 </head>
 
 <body>
 
+  <p><button onclick="run()">Click here to start call</button></p>
+  <p><button onclick="createFakes()">Add fake users</button></p>
 
+  <!-- Div "participants" contains the participants on the call. -->
+  <div id="participants"></div>
+
+  <!-- Button "raise-hand" will toggle the hand-raised state of the user. -->
+  <p><button id="raise-hand" onclick="toggleRaised()">Raise Hand</button></p>
+
+  <!-- The call must be destroyed when you are done to free resources. -->
+  <p><button onclick="endCall()">End Call</button></p>
+
+  <!-- We can implement the raise-hand feature with a little bit of JavaScript. -->
   <script>
+    let raiseState = true;
+
+    function showEvent(e) {
+      console.log("video call event -->", e);
+    }
+
+    // First, attach the video call iframe to the browser window.
+    window.callFrame = window.DailyIframe.createFrame();
+
+    // Then register event listeners on the callFrame for:
+    // When participants enter, update state (like turning their camera off), and leave the call.
+    // When there is a message to the app (to update on hand-raise/-lower).
+    // If there is an error.
+    callFrame
+      .on("participant-joined", participantHandler)
+      .on("participant-updated", participantHandler)
+      .on("participant-left", participantHandler)
+      .on("app-message", messageHandler)
+      .on("error", showEvent);
+
+    // Run creates and joins the video call, and registers event handlers that will let us
+    // update our UI based on call events.
+    async function run() {
+      // Then create a meeting room using a function from our helper script 
+      // and join that room.
+      //room = await createMtgRoom();
+
+      //callFrame.join({ url: room.url });
+      callFrame.join({ url: "https://amozeak.daily.co/hello" });
+    }
+
+    // CreateFakes adds some fake participants to the call.
+    function createFakes() {
+      callFrame.addFakeParticipant();
+      callFrame.addFakeParticipant();
+    }
+
+    // EndCall destroys the callFrame.
+    function endCall() {
+      callFrame.destroy();
+    }
+
+    // ParticipantHandler runs different strategies when participants join,
+    // update, and leave the call.
+    function participantHandler(e) {
+      console.log(e.action);
+      switch (e.action) {
+        case "participant-joined":
+          let pList = document.getElementById("participants");
+          let p = document.createElement("P");
+          p.innerHTML = e.participant.user_name;
+          pList.appendChild(p);
+          break;
+
+        case "participant-updated":
+          showEvent(e);
+          break;
+
+        case "participant-left":
+          // Remove the participant from the UI.
+          break;
+      }
+    }
+
+    // MessageHandler runs strategies for handling messages from objects that
+    // use the sendAppMessage() function.
+    function messageHandler(e) {
+      console.log("message received!");
+    }
+
+    // ToggleRaised toggles whether or not the local user's hand is raised.
+    function toggleRaised() {
+      let data = {
+        raised: raiseState,
+        msg: "Got some data."
+      };
+      callFrame.sendAppMessage(data, "*");
+    }
 
   </script>
 </body>
