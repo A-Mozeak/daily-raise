@@ -15,19 +15,19 @@
   </head>
 
   <body>
-    <p><button onclick="startCall()">Click here to start call</button></p>
-    <p><button onclick="createFakes()">Add fake users</button></p>
+    <p><button onclick="startCall()">Start Call</button></p>
+    <p id="callURL">Input this URL to join an existing call: </p>
+    <h4>-OR-</h4>
 
-    <!-- Div "participants" contains the participants on the call. -->
-    <div id="participants"></div>
+    <!-- Allow joining an existing demo room. -->
+    <input id="joinURL" />
+    <button onclick="joinExisting()">Join Existing Call</button>
+
+    <!-- UL "participants" contains the participants on the call. -->
+    <ul id="participants"></ul>
 
     <!-- Button "raise-hand" will toggle the hand-raised state of the user. -->
     <p><button id="raise-hand" onclick="toggleRaised()">Raise Hand</button></p>
-
-    <!-- The call must be destroyed when you are done to free resources. -->
-    <p><button onclick="endCall()">End Call</button></p>
-
-    <!-- We can implement the raise-hand feature with a little bit of JavaScript. -->
   </body>
 
 </html>
