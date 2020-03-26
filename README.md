@@ -14,8 +14,8 @@ In a real-world meeting, there are many situations in which you might want to ra
 
 ## Setup
 To start, let's create a simple chat app using the [Super Simple Demo](https://docs.daily.co/docs/demos#section-1-super-simple-demo). The Super Simple Demo imports two scripts in the header of its *index.html* file:
- - *daily.js* - imports the Daily.co API.
- - *create-demo-room.js* - provides functions for creating a meeting room on a demo domain ([View Source](https://github.com/daily-co/daily-demos/blob/master/static-demos/shared-assets/create-demo-room.js))
+ - *daily-js* - imports the Daily.co API.
+ - *create-demo-room* - provides functions for creating a meeting room on a demo domain ([View Source](https://github.com/daily-co/daily-demos/blob/master/static-demos/shared-assets/create-demo-room.js))
 
 We're going to add our custom functionality to the script at the bottom of the document. The ```<script>``` at the bottom of the Super Simple Demo demonstrates a lot of useful features of the Daily.co API, but for this tutorial you can remove most of it. Leave the following lines in the script:
 ```javascript
