@@ -5,6 +5,8 @@ Quick links: [REST API docs](https://docs.daily.co/reference) | [Front-End API d
 
 We've made video calls so easy to set up that you can add video chat to your website or mobile app with just a few lines of code. Daily.co video calls use WebRTC, which allows them to work in the browser; there's no need to coordinate app downloads for your team, friends, customers, or anyone else you want to meet with. The below image, from one of our online demos, shows our video call UI embedded in an app:
 
+![A video call running in a mock app](https://files.readme.io/3aa5e0b-Fake_App2x.jpg)
+
 Our goals for the Daily.co API are:
  1. To get you up and running with video calls in just a few minutes.
  2. To enable a wide variety of use cases and workflows.
