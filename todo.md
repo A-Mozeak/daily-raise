@@ -25,5 +25,5 @@
     - Rewrite so that all the listeners are mentioned and it guides the flow of the post.
 1. ~~End with the participant handler fully realised.~~
     - ~~"Our participantHandler should look like this:"~~
-1. Include full source code.
+1. ~~Include full source code.~~
 1. Generate alternate post where I explicitly stick to super simple demo.

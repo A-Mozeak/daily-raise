@@ -19,7 +19,7 @@ To start, let's create a simple chat app using the [Super Simple Demo](https://d
  - *daily.js* - imports the Daily.co API.
  - *create-demo-room.js* - provides functions for creating a meeting room on a demo domain ([View Source](https://github.com/daily-co/daily-demos/blob/master/static-demos/shared-assets/create-demo-room.js))
 
-We're going to add our custom functionality to the script at the bottom of the document. The ```<script>``` at the bottom of the Super Simple Demo demonstrates a lot of useful features of the Daily.co API, but for this tutorial you can remove most of it. Leave the following lines in the script:
+We're going to add our own *custom.js* file to the document, inside which we'll build our own functionality. Per the ```<script>``` at the bottom of *index.html*, copy and paste the following code into your *custom.js* file, then delete the script from the bottom of *index.html*:
 ```javascript
 window.callFrame = window.DailyIframe.createFrame();
 
@@ -27,11 +27,12 @@ function showEvent(e) {
     console.log("video call event -->", e);
 }
 ```
+Be sure to either **defer** the script or add it to the end of the file so that the DOM content can load first.
 
 ### Testing Environment
 For our use case, we will want to test some functionality that only works with multiple people on the call. This will require us to connect to our local host from two browser tabs (Incognito tabs work best for this). If you already have a Daily.co account (or would like to make one: [click here](https://dashboard.daily.co/)), you can join the same call from each tab using:
 ```javascript
-async function run() {
+async function startCall() {
     callFrame.join({ 
         url: 'https://your-domain.daily.co/hello',
         showLeaveButton: true
@@ -39,16 +40,16 @@ async function run() {
 }
 ```
 
-The *create-demo-room* script allows us to test call functionality on a demo domain. This domain will be randomly generated, so we have to do a little more setup before we are able to join from two separate tabs. Add an input to the *index.html* body like so:
+The *create-demo-room* script allows us to test call functionality on a demo domain. This domain will be randomly generated, so we have to do a little more setup before we are able to join from two separate tabs. Add an input to *index.html* like so:
 ```html
 <p id="callURL">Input this URL to join an existing call: </p>
 <input id="joinURL" />
 <button onclick="joinExisting()">Join Existing Call</button>
 ```
 
-Then, modify the custom script so that it can provide the room link and handle the input.
+Then, modify *custom.js* so that it can provide the room link and handle the input.
 ```javascript
-async function run() {
+async function startCall() {
     room = await createMtgRoom();
 
     callFrame.join({ 
@@ -107,7 +108,7 @@ function participantHandler(e) {
 ```
 
 ### Local Participant State
-Let's take the opportunity to make a variable that will keep track of the local user's session_id and handState. This will be useful when we want to update other participants about our hand-raised state.
+Let's take the opportunity to make a variable that will keep track of the local user's session_id and handState. This will come in handy (no pun intended) when we want to update other participants about our hand-raised state.
 ```javascript
 let local_data = {
     session_id: "",
@@ -116,12 +117,12 @@ let local_data = {
 ```
 
 ### Rendering Participants
-Outside of our script, we'll create an unordered list to contain the list of participants.
+In our index.html file, we'll create an unordered list to contain the list of participants.
 ```html
 <ul id="participants"></ul>
 ```
 
-Create a function that generates a UI element for each participant. We can later pass in the **session_id** property to ID the elements.
+In the custom.js file, create a function that generates a UI element for each participant. We can later pass in the **session_id** property to ID the elements.
 ```javascript
 function renderParticipant(id, n) {
     let uiList = document.getElementById("participants");
@@ -273,7 +274,9 @@ This is great functionality, but it is only a glimpse of what can be accomplishe
 
 ### index.html
 ```html
+<!DOCTYPE html>
 <html>
+
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -284,6 +287,7 @@ This is great functionality, but it is only a glimpse of what can be accomplishe
         so that we don't have to log in or make a Daily account to test
         things out. -->
     <script src="create-demo-room.js"></script>
+    <script src="custom.js" defer></script>
   </head>
 
   <body>
@@ -300,111 +304,113 @@ This is great functionality, but it is only a glimpse of what can be accomplishe
 
     <!-- Button "raise-hand" will toggle the hand-raised state of the user. -->
     <p><button id="raise-hand" onclick="toggleRaised()">Raise Hand</button></p>
-
-    <script>
-      window.callFrame = window.DailyIframe.createFrame();
-
-      // ShowEvent logs video call events to the console.
-      function showEvent(e) {
-          console.log("video call event -->", e);
-      }
-
-      // Local_data stores the session_id and hand state of the local user.
-      let local_data = {
-          session_id: "",
-          handState: false,
-      }
-
-      // Run creates and joins the video call.
-      async function run() {
-          room = await createMtgRoom();
-
-          callFrame.join({ 
-              url: room.url,
-              showLeaveButton: true
-          });
-
-          document.getElementById("callURL").innerHTML += room.url;
-      }
-
-      // JoinExisting joins an existing call based on the joinURL input element.
-      function joinExisting() {
-          let link = document.getElementById("joinURL").value;
-          callFrame.join({ 
-              url: link,
-              showLeaveButton: true
-          });
-      }
-
-      // Register event listeners here.
-      callFrame
-        .on("joined-meeting", participantHandler)
-        .on("participant-joined", participantHandler)
-        .on("participant-left", participantHandler)
-        .on("app-message", messageHandler)
-        .on("error", showEvent);
-
-      // ParticipantHandler runs different strategies when participants join,
-      // update, and leave the call.
-      function participantHandler(e) {
-          console.log(e.action);
-          switch (e.action) {
-              case "joined-meeting":
-                  renderParticipant(e.participants.local.session_id, "Local");
-                  local_data.session_id = e.participants.local.session_id;
-                  break;
-              case "participant-joined":
-                  renderParticipant(e.participant.session_id, "Participant");
-                  callFrame.sendAppMessage(local_data);
-                  break;
-              case "participant-left":
-                  deleteParticipant(e.participant.session_id);
-                  break;
-          }
-      }
-
-      // MessageHandler runs strategies for handling messages from the 
-      // sendAppMessage() function.
-      function messageHandler(e) {
-          toggleRaised(e.data.session_id, e.data.handState);
-      }
-
-      // RenderParticipant creates a UI element for a participant.
-      function renderParticipant(id, n) {
-          let uiList = document.getElementById("participants");
-          let render = `<li id="q${id}">
-          <h3>${n}</h3>
-          <p id="p${id}">Hand Lowered</p>
-          </li>`;
-          uiList.innerHTML += render;
-      }
-
-      // DeleteParticipant removes a participant's UI element from the page.
-      function deleteParticipant(id) {
-          let el = document.getElementById("q" + id);
-          el.remove();
-      }
-
-      // ToggleRaised toggles the hand state of a call participant.
-      function toggleRaised(id, s) {
-          let pid;
-          let state;
-          if (id == undefined) {
-              pid = local_data.session_id;
-              state = local_data.handState;
-              callFrame.sendAppMessage(local_data);
-              local_data.handState = !local_data.handState;
-          } else {
-              pid = id;
-              state = s;
-          };
-
-          let indicator = document.getElementById("p" + pid);
-          indicator.innerHTML = (state == false) ? "Hand Raised" : "Hand Lowered";
-      }
-    </script>
   </body>
+
 </html>
+```
+
+### custom.js
+```javascript
+window.callFrame = window.DailyIframe.createFrame();
+
+// Local_data stores the session_id and hand state of the local user.
+let local_data = {
+    session_id: "",
+    handState: false,
+}
+
+// StartCall creates and joins the video call.
+async function startCall() {
+    room = await createMtgRoom();
+
+    callFrame.join({ 
+        url: room.url,
+        showLeaveButton: true
+    });
+
+    document.getElementById("callURL").innerHTML += room.url;
+}
+
+// JoinExisting joins an existing call based on the joinURL input element.
+function joinExisting() {
+    let link = document.getElementById("joinURL").value;
+    callFrame.join({ 
+        url: link,
+        showLeaveButton: true
+    });
+}
+
+// Register event listeners here.
+callFrame
+  .on("joined-meeting", participantHandler)
+  .on("participant-joined", participantHandler)
+  .on("participant-left", participantHandler)
+  .on("app-message", messageHandler)
+  .on("error", showEvent);
+
+// ParticipantHandler runs different strategies when participants join,
+// update, and leave the call.
+function participantHandler(e) {
+    console.log(e.action);
+    switch (e.action) {
+        case "joined-meeting":
+            renderParticipant(e.participants.local.session_id, "Local");
+            local_data.session_id = e.participants.local.session_id;
+            break;
+        case "participant-joined":
+            renderParticipant(e.participant.session_id, "Participant");
+            callFrame.sendAppMessage(local_data);
+            break;
+        case "participant-left":
+            deleteParticipant(e.participant.session_id);
+            break;
+    }
+}
+
+// MessageHandler runs strategies for handling messages from the 
+// sendAppMessage() function.
+function messageHandler(e) {
+    toggleRaised(e.data.session_id, e.data.handState);
+}
+
+// RenderParticipant creates a UI element for a participant.
+function renderParticipant(id, n) {
+    let uiList = document.getElementById("participants");
+    let render = `<li id="q${id}">
+    <h3>${n}</h3>
+    <p id="p${id}">Hand Lowered</p>
+    </li>`;
+    uiList.innerHTML += render;
+}
+
+// DeleteParticipant removes a participant's UI element from the page.
+function deleteParticipant(id) {
+    let el = document.getElementById("q" + id);
+    el.remove();
+}
+
+// ToggleRaised toggles the hand state of a call participant.
+function toggleRaised(id, s) {
+    let pid;
+    let state;
+    if (id == undefined) {
+        pid = local_data.session_id;
+        state = local_data.handState;
+        callFrame.sendAppMessage(local_data);
+        local_data.handState = !local_data.handState;
+    } else {
+        pid = id;
+        state = s;
+    };
+
+    let indicator = document.getElementById("p" + pid);
+    indicator.innerHTML = (state == false) ? "Hand Raised" : "Hand Lowered";
+}
+
+// ShowEvent logs video call events to the console.
+function showEvent(e) {
+    console.log("video call event -->", e);
+}
 ```
 
 ### create-demo-room.js (optional)
