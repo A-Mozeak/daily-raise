@@ -63,3 +63,8 @@ node_modules/
 
 # dotenv environment variables file
 .env
+
+# Blog Workspace
+READMEAlt.md
+todo.md
+custom.js
