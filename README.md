@@ -1,5 +1,4 @@
-# daily-raise
-How to Implement a "Raise Your Hand" Feature Using the Daily.co API.
+# Daily.co - Adding "Raise Your Hand" Functionality to a Call
 
 ## Introduction
 The Daily.co API makes it easy to add video call functionality to your web or mobile app. However, that's not the only thing it can do. In the few lines of code it takes to integrate the API into your app, you also gain access to a robust set of properties and methods that allow you to truly customize your video call experience. Let's take a look at one popular example: raising your hand virtually on a call.
