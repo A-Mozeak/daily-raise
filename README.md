@@ -10,7 +10,7 @@ In a real-world meeting, there are many situations in which you might want to ra
 
  In digital meetings, we often find that hand-raising is just as useful and necessary as it is in the real world.
 
- In this tutorial, we will walk through implementing hand-raising functionality using the Daily.co API.
+ In this tutorial, we will walk through implementing hand-raising functionality using the Daily.co API. You can test out the final product [here](https://a-mozeak.github.io/daily-raise/public/index.html) or [view the source code](https://github.com/A-Mozeak/daily-raise/blob/master/public/index.html).
 
 ## Setup
 To start, let's create a simple chat app using the [Super Simple Demo](https://docs.daily.co/docs/demos#section-1-super-simple-demo). The Super Simple Demo imports two scripts in the header of its *index.html* file:
